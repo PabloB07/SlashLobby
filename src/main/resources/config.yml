@@ -1,0 +1,15 @@
+# Lobby System
+# Made by: Rodrigo R.
+
+server: "lobby" # The server name (Registered on config.yaml of Bungee or velocity.toml)
+# The /lobby command will not be available on the following servers
+disabled_servers:
+  - "auth"
+
+aliases:
+  - "hub" # Aliases for the /lobby command (In this example, the /hub command will do the same as the /lobby command)
+
+messages:
+  sending: "&aSending you to the lobby..."
+  already_in_lobby: "&cYou are already in the lobby!"
+  disabled: "&cThis command is disabled on this server!"
