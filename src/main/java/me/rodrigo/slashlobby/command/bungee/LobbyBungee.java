@@ -1,7 +1,7 @@
-package me.rodrigo.lobby.command.bungee;
+package me.rodrigo.slashlobby.command.bungee;
 
-import me.rodrigo.lobby.lib.MinecraftColorCode;
-import me.rodrigo.lobby.lib.Parser;
+import me.rodrigo.slashlobby.lib.MinecraftColorCode;
+import me.rodrigo.slashlobby.lib.Parser;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.config.ServerInfo;

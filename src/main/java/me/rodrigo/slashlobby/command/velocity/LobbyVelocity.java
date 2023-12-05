@@ -1,12 +1,12 @@
-package me.rodrigo.lobby.command.velocity;
+package me.rodrigo.slashlobby.command.velocity;
 
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import me.rodrigo.lobby.lib.MinecraftColorCode;
-import me.rodrigo.lobby.lib.Parser;
+import me.rodrigo.slashlobby.lib.MinecraftColorCode;
+import me.rodrigo.slashlobby.lib.Parser;
 import net.kyori.adventure.text.Component;
 
 import java.util.Optional;

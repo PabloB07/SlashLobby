@@ -1,4 +1,4 @@
-package me.rodrigo.lobby.lib;
+package me.rodrigo.slashlobby.lib;
 
 public class MinecraftColorCode {
     public static String Black = "§0";

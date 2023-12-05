@@ -1,8 +1,8 @@
-package me.rodrigo.lobby.bungee;
+package me.rodrigo.slashlobby.bungee;
 
-import me.rodrigo.lobby.command.bungee.LobbyBungee;
-import me.rodrigo.lobby.lib.Http;
-import me.rodrigo.lobby.lib.Parser;
+import me.rodrigo.slashlobby.command.bungee.LobbyBungee;
+import me.rodrigo.slashlobby.lib.Http;
+import me.rodrigo.slashlobby.lib.Parser;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.plugin.Plugin;
 
