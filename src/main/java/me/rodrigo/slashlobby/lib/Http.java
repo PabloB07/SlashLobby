@@ -17,6 +17,6 @@ public class Http {
     }
 
     public static void DownloadConfig( String savePath) throws IOException {
-        DownloadFile("https://raw.githubusercontent.com/rodri-r-z/Lobby/main/src/main/resources/config.yml", savePath);
+        DownloadFile("https://raw.githubusercontent.com/rodri-r-z/SlashLobby/main/src/main/resources/config.yml", savePath);
     }
 }
