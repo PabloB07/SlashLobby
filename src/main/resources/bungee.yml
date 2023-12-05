@@ -1,2 +1,5 @@
-  name:
-  main:
+  name: Lobby
+  version: "1.0.0"
+  authors: ["Rodrigo R."]
+  description: "/lobby for BungeeCord/Waterfall/Velocity"
+  main: me.rodrigo.lobby.bungee.Lobby

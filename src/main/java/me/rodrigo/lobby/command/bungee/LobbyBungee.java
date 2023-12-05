@@ -1,11 +1,7 @@
 package me.rodrigo.lobby.command.bungee;
 
-import com.velocitypowered.api.proxy.Player;
-import com.velocitypowered.api.proxy.ServerConnection;
-import com.velocitypowered.api.proxy.server.RegisteredServer;
 import me.rodrigo.lobby.lib.MinecraftColorCode;
 import me.rodrigo.lobby.lib.Parser;
-import net.kyori.adventure.text.Component;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.config.ServerInfo;

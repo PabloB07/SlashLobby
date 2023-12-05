@@ -1,8 +1,6 @@
 package me.rodrigo.lobby.bungee;
 
-import com.velocitypowered.api.proxy.server.RegisteredServer;
 import me.rodrigo.lobby.command.bungee.LobbyBungee;
-import me.rodrigo.lobby.command.velocity.LobbyVelocity;
 import me.rodrigo.lobby.lib.Http;
 import me.rodrigo.lobby.lib.Parser;
 import net.md_5.bungee.api.config.ServerInfo;
@@ -10,7 +8,6 @@ import net.md_5.bungee.api.plugin.Plugin;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Optional;
 import java.util.logging.Logger;
 
 public class Lobby extends Plugin {
