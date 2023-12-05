@@ -19,7 +19,9 @@ import java.util.Optional;
 @Plugin(
         id = "slashlobby",
         name = "SlashLobby",
-        version = "1.0-SNAPSHOT"
+        version = "1.0-SNAPSHOT",
+        description = "/lobby for BungeeCord/Waterfall/Velocity",
+        authors = {"Rodrigo R."}
 )
 public class SlashLobby {
     @Inject
