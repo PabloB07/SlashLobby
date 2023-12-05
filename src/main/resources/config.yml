@@ -1,4 +1,4 @@
-# Lobby System
+# Lobby System - SlashLobby
 # Made by: Rodrigo R.
 
 server: "lobby" # The server name (Registered on config.yaml of Bungee or velocity.toml)
