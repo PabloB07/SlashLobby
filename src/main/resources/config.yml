@@ -13,3 +13,5 @@ messages:
   sending: "&aSending you to the lobby..."
   already_in_lobby: "&cYou are already in the lobby!"
   disabled: "&cThis command is disabled on this server!"
+  error_console: "&cYou cannot execute this command in the console!"
+  internal_error: "&cAn internal error has ocurred."

@@ -15,4 +15,8 @@ public class Http {
 
         Files.copy(inputStream, outputPath, StandardCopyOption.REPLACE_EXISTING);
     }
+
+    public static void DownloadConfig( String savePath) throws IOException {
+        DownloadFile("https://raw.githubusercontent.com/rodri-r-z/Lobby/main/src/main/resources/config.yml", savePath);
+    }
 }
