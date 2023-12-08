@@ -1,13 +1,15 @@
 package me.rodrigo.slashlobby.bungee;
 
 import me.rodrigo.slashlobby.command.bungee.LobbyBungee;
-import me.rodrigo.slashlobby.lib.Http;
 import me.rodrigo.slashlobby.lib.Parser;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.plugin.Plugin;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.logging.Logger;
 
 public class Lobby extends Plugin {
@@ -23,7 +25,12 @@ public class Lobby extends Plugin {
 
         try {
             if (!dataDirectory.resolve("config.yml").toFile().exists()) {
-                Http.DownloadConfig(dataDirectory.toString() + "/config.yml");
+                final InputStream stream = getResourceAsStream("config.yml");
+                if (stream == null) {
+                    logger.severe("Could not get the config file");
+                    return;
+                }
+                Files.copy(stream, dataDirectory.resolve("config.yml"), StandardCopyOption.REPLACE_EXISTING);
             }
             config = new Parser(dataDirectory.resolve("config.yml"));
         } catch (IOException e) {

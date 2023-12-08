@@ -8,18 +8,20 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import me.rodrigo.slashlobby.command.velocity.LobbyVelocity;
-import me.rodrigo.slashlobby.lib.Http;
 import me.rodrigo.slashlobby.lib.Parser;
 import org.slf4j.Logger;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Optional;
 
 @Plugin(
         id = "slashlobby",
         name = "SlashLobby",
-        version = "1.2",
+        version = "1.3",
         description = "/lobby for BungeeCord/Waterfall/Velocity",
         authors = {"Rodrigo R."}
 )
@@ -40,11 +42,16 @@ public class SlashLobby {
 
         try {
             if (!dataDirectory.resolve("config.yml").toFile().exists()) {
-                Http.DownloadConfig(dataDirectory + "/config.yml");
+                final InputStream stream = getClass().getClassLoader().getResourceAsStream("config.yml");
+                if (stream == null) {
+                    logger.error("Could not get the config file");
+                    return;
+                }
+                Files.copy(stream, dataDirectory.resolve("config.yml"), StandardCopyOption.REPLACE_EXISTING);
             }
             config = new Parser(dataDirectory.resolve("config.yml"));
         } catch (IOException e) {
-            logger.error("Could not download/read the config file. Error: " + e.getMessage());
+            logger.error("Could not get/read the config file. Error: " + e.getMessage());
         }
     }
 
