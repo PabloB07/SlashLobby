@@ -1,5 +1,5 @@
   name: SlashLobby
-  version: "1.0.0"
+  version: "1.1"
   authors: ["Rodrigo R."]
   description: "/lobby for BungeeCord/Waterfall/Velocity"
   main: me.rodrigo.slashlobby.bungee.Lobby

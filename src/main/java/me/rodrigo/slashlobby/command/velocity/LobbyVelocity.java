@@ -45,6 +45,13 @@ public class LobbyVelocity implements SimpleCommand {
             return;
         }
 
+        if (parser.AsStringList("disabled_servers").stream().anyMatch(a -> a.equals(server.getServerInfo().getName()))) {
+            source.sendMessage(Component.text(
+                    MinecraftColorCode.ReplaceAllAmpersands(parser.AsString("messages.disabled"))
+            ));
+            return;
+        }
+
         player.createConnectionRequest(server).connect();
         source.sendMessage(Component.text(
                 MinecraftColorCode.ReplaceAllAmpersands(parser.AsString("messages.sending"))

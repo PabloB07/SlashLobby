@@ -9,8 +9,6 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.connection.Server;
 import net.md_5.bungee.api.plugin.Command;
 
-import java.util.Optional;
-
 public class LobbyBungee extends Command {
     private final ServerInfo server;
     private final Parser parser;
@@ -40,6 +38,13 @@ public class LobbyBungee extends Command {
         if (serverConnection.getInfo().getName().equals(server.getName())) {
             source.sendMessage(TextComponent.fromLegacyText(
                     MinecraftColorCode.ReplaceAllAmpersands(parser.AsString("messages.already_in_lobby"))
+            ));
+            return;
+        }
+
+        if (parser.AsStringList("disabled_servers").stream().anyMatch(a -> a.equals(server.getName()))) {
+            source.sendMessage(TextComponent.fromLegacyText(
+                    MinecraftColorCode.ReplaceAllAmpersands(parser.AsString("messages.disabled"))
             ));
             return;
         }
