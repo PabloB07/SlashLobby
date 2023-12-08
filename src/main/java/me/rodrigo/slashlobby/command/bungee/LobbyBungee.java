@@ -42,7 +42,7 @@ public class LobbyBungee extends Command {
             return;
         }
 
-        if (parser.AsStringList("disabled_servers").stream().anyMatch(a -> a.equals(server.getName()))) {
+        if (parser.AsStringList("disabled_servers").stream().anyMatch(a -> a.equals(serverConnection.getInfo().getName()))) {
             source.sendMessage(TextComponent.fromLegacyText(
                     MinecraftColorCode.ReplaceAllAmpersands(parser.AsString("messages.disabled"))
             ));
