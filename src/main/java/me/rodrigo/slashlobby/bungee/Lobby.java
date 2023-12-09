@@ -130,13 +130,13 @@ public class Lobby extends Plugin implements Listener {
         timers.removeIf(a -> a.getUuid().toString().equals(e.getPlayer().getUniqueId().toString()));
     }
 
-    public boolean LoadConfig() {
+    public Parser LoadConfig() {
         final Logger logger = getLogger();
         final Path dataDirectory = getDataFolder().toPath();
         final Parser config;
         if (!dataDirectory.toFile().exists() && !dataDirectory.toFile().mkdirs()) {
             logger.severe("Could not create data directory");
-            return false;
+            return null;
         }
 
         try {
@@ -144,32 +144,32 @@ public class Lobby extends Plugin implements Listener {
                 final InputStream stream = getResourceAsStream("config.yml");
                 if (stream == null) {
                     logger.severe("Could not get the config file");
-                    return false;
+                    return null;
                 }
                 Files.copy(stream, dataDirectory.resolve("config.yml"), StandardCopyOption.REPLACE_EXISTING);
             }
             config = new Parser(dataDirectory.resolve("config.yml"));
         } catch (IOException e) {
             logger.severe("Could not download/read the config file. Error: " + e.getMessage());
-            return false;
+            return null;
         }
         final ServerInfo lobby = getProxy().getServerInfo(config.AsString("server"));
         if (lobby == null) {
             logger.severe("Could not find server: " + config.AsString("server"));
-            return false;
+            return null;
         }
         this.config = config;
         this.lobby = lobby;
         for ( final TimerCache cache : timers ) {
             cache.setParser(config);
         }
-        return true;
+        return config;
     }
 
     @Override
     public void onEnable() {
         final Logger logger = getLogger();
-        if (!LoadConfig()) return;
+        if (LoadConfig() == null) return;
         getProxy().getPluginManager().registerCommand(this, new LobbyBungee(lobby, config, "lobby", this));
         getProxy().getPluginManager().registerListener(this, this);
         for(final String alias : config.AsStringList("aliases")) {

@@ -31,7 +31,7 @@ import java.util.Optional;
 @Plugin(
         id = "slashlobby",
         name = "SlashLobby",
-        version = "1.5",
+        version = "1.7",
         description = "/lobby for BungeeCord/Waterfall/Velocity",
         authors = {"Rodrigo R."}
 )
@@ -44,8 +44,9 @@ public class SlashLobby {
     private final Path dataDirectory;
     private RegisteredServer lobby;
 
-    public void ReloadConfig() throws FileNotFoundException {
+    public Parser ReloadConfig() throws FileNotFoundException {
         config = new Parser(dataDirectory.resolve("config.yml"));
+        return config;
     }
 
     @Subscribe
@@ -64,13 +65,13 @@ public class SlashLobby {
                             Component.text(
                                     MinecraftColorCode.ReplaceAllAmpersands(config.AsString("titles." + configProp + ".title")
                                             .replaceAll("(?i)\\{time\\}",
-                                                    +canUseAgain + ""
+                                                    String.valueOf(canUseAgain)
                                             ).replaceAll("(?i)\\{player\\}", plr.getUsername()))
                             ),
                             Component.text(
                                     MinecraftColorCode.ReplaceAllAmpersands(config.AsString("titles." + configProp + ".subtitle")
                                             .replaceAll("(?i)\\{time\\}",
-                                                    +canUseAgain + ""
+                                                    String.valueOf(canUseAgain)
                                             ).replaceAll("(?i)\\{player\\}", plr.getUsername()))
                             ),
                             Title.Times.times(
@@ -93,7 +94,7 @@ public class SlashLobby {
                             final int canUseAgain = Integer.parseInt((Long.parseLong(cache.get().getAmplifier()+"") - (System.currentTimeMillis() - cache.get().getLastUsed()))+"") / 1000;
                             final String message = config.AsString("messages.cooldown")
                                     .replaceAll("(?i)\\{time\\}",
-                                            + canUseAgain+""
+                                            String.valueOf(canUseAgain)
                                     ).replaceAll("(?i)\\{player\\}", plr.getUsername());
                             if (!message.trim().isEmpty()) {
                                 plr.sendMessage(Component.text(

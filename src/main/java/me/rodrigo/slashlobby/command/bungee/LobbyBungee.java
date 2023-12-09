@@ -12,7 +12,7 @@ import net.md_5.bungee.api.plugin.Command;
 
 public class LobbyBungee extends Command {
     private final ServerInfo server;
-    private final Parser parser;
+    private Parser parser;
     private final Lobby lobbyBungee;
 
     public LobbyBungee(ServerInfo server, Parser parser, String name, Lobby lobbyBungee) {
@@ -36,7 +36,7 @@ public class LobbyBungee extends Command {
                 ));
                 return;
             }
-            lobbyBungee.LoadConfig();
+            parser = lobbyBungee.LoadConfig();
             final String message = parser.AsString("messages.config_reload");
             if (message.trim().isEmpty()) return;
             source.sendMessage(TextComponent.fromLegacyText(

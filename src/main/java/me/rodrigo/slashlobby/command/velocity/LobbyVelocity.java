@@ -14,7 +14,7 @@ import java.util.Optional;
 
 public class LobbyVelocity implements SimpleCommand {
     private final RegisteredServer server;
-    private final Parser parser;
+    private Parser parser;
     private final SlashLobby slashLobby;
 
     public LobbyVelocity(RegisteredServer server, Parser parser, SlashLobby slashLobby) {
@@ -40,15 +40,15 @@ public class LobbyVelocity implements SimpleCommand {
                 return;
             }
             try {
-                slashLobby.ReloadConfig();
+                parser = slashLobby.ReloadConfig();
+                final String message = parser.AsString("messages.config_reload");
+                if (message.trim().isEmpty()) return;
+                source.sendMessage(Component.text(
+                        MinecraftColorCode.ReplaceAllAmpersands(message)
+                ));
             } catch (Exception e) {
                 slashLobby.SendErrorMessage("The config file could not be found!");
             }
-            final String message = parser.AsString("messages.config_reload");
-            if (message.trim().isEmpty()) return;
-            source.sendMessage(Component.text(
-                    MinecraftColorCode.ReplaceAllAmpersands(message)
-            ));
             return;
         }
         if (!(source instanceof Player)) {
