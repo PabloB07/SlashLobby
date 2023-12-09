@@ -29,7 +29,6 @@ cooldown: # A cooldown before users can use the /lobby command again
   unit: MINUTES # Supported: SECONDS, MINUTES, HOURS, DAYS
   value: 1
   enabled: true
-  reset_on_leave: false # The timer will be reset when the player leaves the server
 
 # Added on v1.4:
 titles: # Should the plugin display titles?

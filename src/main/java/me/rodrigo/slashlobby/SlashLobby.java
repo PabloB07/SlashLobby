@@ -1,6 +1,7 @@
 package me.rodrigo.slashlobby;
 
 import com.google.inject.Inject;
+import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.plugin.Plugin;
@@ -30,7 +31,7 @@ import java.util.Optional;
 @Plugin(
         id = "slashlobby",
         name = "SlashLobby",
-        version = "1.4",
+        version = "1.5",
         description = "/lobby for BungeeCord/Waterfall/Velocity",
         authors = {"Rodrigo R."}
 )
@@ -45,6 +46,11 @@ public class SlashLobby {
 
     public void ReloadConfig() throws FileNotFoundException {
         config = new Parser(dataDirectory.resolve("config.yml"));
+    }
+
+    @Subscribe
+    public void onDisconnect(DisconnectEvent e) {
+        timers.removeIf(a -> a.getUuid().toString().equals(e.getPlayer().getUniqueId().toString()));
     }
 
     public void SendErrorMessage(String j) {
