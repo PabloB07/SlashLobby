@@ -63,6 +63,13 @@ public class TimerCache
         return System.currentTimeMillis() - this.LastUsed >= Double.parseDouble(this.parser.AsObject("cooldown.value").toString()) * this.getAmplifier();
     }
 
+    public int getCurrentCooldown() {
+        long elapsedTime = System.currentTimeMillis() - this.LastUsed;
+        long remainingTime = (long) (Double.parseDouble(this.parser.AsObject("cooldown.value").toString()) * this.getAmplifier()) - elapsedTime;
+
+        return Integer.parseInt(String.valueOf(Math.max(0, remainingTime / 1000)));
+    }
+
     public TimerCache registerNewUsage() {
         this.LastUsed = System.currentTimeMillis();
         return this;

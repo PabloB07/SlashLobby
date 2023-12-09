@@ -31,7 +31,7 @@ import java.util.Optional;
 @Plugin(
         id = "slashlobby",
         name = "SlashLobby",
-        version = "1.6",
+        version = "1.7",
         description = "/lobby for BungeeCord/Waterfall/Velocity",
         authors = {"Rodrigo R."}
 )
@@ -91,7 +91,7 @@ public class SlashLobby {
                     final Optional<TimerCache> cache = timers.stream().filter(a -> a.getUuid().toString().equals(plr.getUniqueId().toString())).findFirst();
                     if (cache.isPresent()) {
                         if (!cache.get().canUse()) {
-                            final int canUseAgain = Integer.parseInt((Long.parseLong(cache.get().getAmplifier()+"") - (System.currentTimeMillis() - cache.get().getLastUsed()))+"") / 1000;
+                            final int canUseAgain = cache.get().getCurrentCooldown();
                             final String message = config.AsString("messages.cooldown")
                                     .replaceAll("(?i)\\{time\\}",
                                             String.valueOf(canUseAgain)
