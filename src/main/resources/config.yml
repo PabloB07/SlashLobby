@@ -15,3 +15,44 @@ messages:
   disabled: "&cThis command is disabled on this server!"
   error_console: "&cYou cannot execute this command in the console!"
   internal_error: "&cAn internal error has ocurred."
+  cooldown: "&cYou may use this command again in {time} seconds."
+  no_permission: "&cYou don't have permission to execute this command."
+  config_reload: "&aConfig reloaded!"
+  # Added on v1.4: Empty messages will not be sent
+  # Added on v1.4: Forward Players to Lobby if they don't have permission to reload the config
+  # Added on v1.4: /lobby reload - Permission: slashlobby.reload
+  # Added on v1.4: Asyncronous server forwarding - improve performance and reduce lag on your server
+
+forward_no_permission: true # Forward Players to Lobby if they don't have permission to reload the config
+
+cooldown: # A cooldown before users can use the /lobby command again
+  unit: MINUTES # Supported: SECONDS, MINUTES, HOURS, DAYS
+  value: 1
+  enabled: true
+  reset_on_leave: false # The timer will be reset when the player leaves the server
+
+# Added on v1.4:
+titles: # Should the plugin display titles?
+  enabled: false
+  fadein: 5
+  stay: 10
+  fadeout: 5
+  # Known issues:
+
+  sending:
+    title: "&aLobby"
+    subtitle: "&aSending you to the lobby..."
+  cooldown:
+    title: "&aLobby"
+    subtitle: "&aYou may use this command again in {time}."
+  already_in_lobby:
+    title: "&cLobby"
+    subtitle: "&cYou are already in the lobby!"
+  disabled:
+    title: "&cLobby"
+    subtitle: "&cThis command is disabled on this server!"
+  internal_error:
+    title: "&cLobby"
+    subtitle: "&cAn internal error has ocurred."
+
+  # Added on v1.4: The variable {player} is available on messages and titles.
