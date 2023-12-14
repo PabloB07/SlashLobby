@@ -7,8 +7,9 @@ import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
-import net.md_5.bungee.api.connection.Server;
 import net.md_5.bungee.api.plugin.Command;
+
+import java.util.Optional;
 
 public class LobbyBungee extends Command {
     private final ServerInfo server;
@@ -28,6 +29,7 @@ public class LobbyBungee extends Command {
             if (!source.hasPermission("slashlobby.reload")) {
                 if (parser.AsBoolean("forward_no_permission") && source instanceof ProxiedPlayer) {
                     lobbyBungee.CreateConnectionRequest((ProxiedPlayer) source);
+                    return;
                 }
                 final String message = parser.AsString("messages.no_permission");
                 if (message.trim().isEmpty()) return;
@@ -36,12 +38,16 @@ public class LobbyBungee extends Command {
                 ));
                 return;
             }
-            parser = lobbyBungee.LoadConfig();
-            final String message = parser.AsString("messages.config_reload");
-            if (message.trim().isEmpty()) return;
-            source.sendMessage(TextComponent.fromLegacyText(
-                    MinecraftColorCode.ReplaceAllAmpersands(message)
-            ));
+            try {
+                parser = lobbyBungee.LoadConfig();
+                final String message = parser.AsString("messages.config_reload");
+                if (message.trim().isEmpty()) return;
+                source.sendMessage(TextComponent.fromLegacyText(
+                        MinecraftColorCode.ReplaceAllAmpersands(message)
+                ));
+            } catch (Exception e) {
+                lobbyBungee.getLogger().severe("The config file could not be found!");
+            }
             return;
         }
         if (!(source instanceof ProxiedPlayer)) {
@@ -53,7 +59,7 @@ public class LobbyBungee extends Command {
             return;
         }
         final ProxiedPlayer player = (ProxiedPlayer) source;
-        final Server serverConnection = player.getServer();
+        final ServerInfo serverConnection = player.getServer().getInfo();
         if (serverConnection == null) {
             lobbyBungee.SendTitle(player, "internal_error", 0);
             final String message = parser.AsString("messages.internal_error");
@@ -63,7 +69,7 @@ public class LobbyBungee extends Command {
             ));
             return;
         }
-        if (serverConnection.getInfo().getName().equals(server.getName())) {
+        if (serverConnection.getName().equals(server.getName())) {
             lobbyBungee.SendTitle(player, "already_in_lobby", 0);
             final String message = parser.AsString("messages.already_in_lobby");
             if (message.trim().isEmpty()) return;
@@ -73,7 +79,7 @@ public class LobbyBungee extends Command {
             return;
         }
 
-        if (parser.AsStringList("disabled_servers").stream().anyMatch(a -> a.equals(serverConnection.getInfo().getName()))) {
+        if (parser.AsStringList("disabled_servers").stream().anyMatch(a -> a.equals(serverConnection.getName()))) {
             lobbyBungee.SendTitle(player, "disabled", 0);
             final String message = parser.AsString("messages.disabled");
             if (message.trim().isEmpty()) return;
@@ -84,13 +90,5 @@ public class LobbyBungee extends Command {
         }
 
         lobbyBungee.CreateConnectionRequest(player);
-        lobbyBungee.SendTitle(player, "sending", 0);
-        {
-            final String message = parser.AsString("messages.sending");
-            if (message.trim().isEmpty()) return;
-            source.sendMessage(TextComponent.fromLegacyText(
-                    MinecraftColorCode.ReplaceAllAmpersands(message)
-            ));
-        }
     }
 }

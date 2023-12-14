@@ -64,7 +64,7 @@ public class Lobby extends Plugin implements Listener {
                             final int canUseAgain = cache.get().getCurrentCooldown();
                             final String message = config.AsString("messages.cooldown")
                                     .replaceAll("(?i)\\{time\\}",
-                                            + canUseAgain+""
+                                            String.valueOf(canUseAgain)
                                     ).replaceAll("(?i)\\{player\\}", plr.getName());
                             if (!message.trim().isEmpty()) {
                                 plr.sendMessage(TextComponent.fromLegacyText(

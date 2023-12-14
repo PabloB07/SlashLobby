@@ -31,6 +31,7 @@ public class LobbyVelocity implements SimpleCommand {
             if (!source.hasPermission("slashlobby.reload")) {
                 if (parser.AsBoolean("forward_no_permission") && source instanceof Player) {
                     slashLobby.CreateConnectionRequest((Player) source);
+                    return;
                 }
                 final String message = parser.AsString("messages.no_permission");
                 if (message.trim().isEmpty()) return;
