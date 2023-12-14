@@ -1,4 +1,4 @@
-package me.rodrigo.slashlobby.lib;
+package dev.rodrigo.slashlobby.lib;
 
 import org.yaml.snakeyaml.Yaml;
 

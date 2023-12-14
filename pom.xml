@@ -4,9 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>me.rodrigo</groupId>
+    <groupId>dev.rodrigo</groupId>
     <artifactId>SlashLobby</artifactId>
-    <version>1.8-DevBuild</version>
+    <version>1.9</version>
     <packaging>jar</packaging>
 
     <name>SlashLobby</name>
@@ -63,10 +63,10 @@
                     </plugin>
                 </plugins>
                 <resources>
-                    <resource>
-                        <directory>src/main/resources</directory>
-                        <filtering>true</filtering>
-                    </resource>
+                  <resource>
+                    <directory>src/main/resources</directory>
+                    <filtering>true</filtering>
+                  </resource>
                 </resources>
             </build>
         </profile>
@@ -127,8 +127,7 @@
                     <autoVersionSubmodules>true</autoVersionSubmodules>
                     <tagNameFormat>@{project.version}</tagNameFormat>
                     <scmCommentPrefix xml:space="preserve">[RELEASE] </scmCommentPrefix>
-                    <goals>install deploy site-deploy
-                    </goals> <!-- install is here to fix javadoc generation in multi-module projects -->
+                    <goals>install deploy site-deploy</goals> <!-- install is here to fix javadoc generation in multi-module projects -->
                     <releaseProfiles>release</releaseProfiles>
                 </configuration>
             </plugin>

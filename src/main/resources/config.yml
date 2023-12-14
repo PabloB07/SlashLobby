@@ -18,10 +18,6 @@ messages:
   cooldown: "&cYou may use this command again in {time} seconds."
   no_permission: "&cYou don't have permission to execute this command."
   config_reload: "&aConfig reloaded!"
-  # Added on v1.4: Empty messages will not be sent
-  # Added on v1.4: Forward Players to Lobby if they don't have permission to reload the config
-  # Added on v1.4: /lobby reload - Permission: slashlobby.reload
-  # Added on v1.4: Asyncronous server forwarding - improve performance and reduce lag on your server
 
 forward_no_permission: true # Forward Players to Lobby if they don't have permission to reload the config
 
@@ -36,8 +32,6 @@ titles: # Should the plugin display titles?
   fadein: 5
   stay: 10
   fadeout: 5
-  # Known issues:
-
   sending:
     title: "&aLobby"
     subtitle: "&aSending you to the lobby..."
@@ -54,4 +48,4 @@ titles: # Should the plugin display titles?
     title: "&cLobby"
     subtitle: "&cAn internal error has ocurred."
 
-  # Added on v1.4: The variable {player} is available on messages and titles.
+  # The variable {player} is available on messages and titles.
