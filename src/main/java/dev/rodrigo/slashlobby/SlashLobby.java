@@ -29,7 +29,7 @@ import java.util.Optional;
 @Plugin(
         id = "slashlobby",
         name = "SlashLobby",
-        version = "1.9"
+        version = "2.0"
 )
 public class SlashLobby {
     private final Logger logger;
@@ -66,7 +66,7 @@ public class SlashLobby {
 
     public void CreateConnectionRequest(Player player) {
         final Optional<ServerConnection> a_currentServer = player.getCurrentServer();
-        if (a_currentServer.isEmpty()) {
+        if (!a_currentServer.isPresent()) {
             SendTitle(player, "internal_error");
             player.sendMessage(
                     Component.text(config.AsString("messages.internal_error")
@@ -159,7 +159,7 @@ public class SlashLobby {
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) {
         final Optional<RegisteredServer> registeredServer = proxyServer.getServer(config.AsString("server"));
-        if (registeredServer.isEmpty()) {
+        if (!registeredServer.isPresent()) {
             logger.error("Server not found");
             return;
         }

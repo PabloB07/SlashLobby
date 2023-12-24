@@ -158,7 +158,7 @@ public class LobbyBungee extends Plugin implements Listener {
     }
 
     @EventHandler
-    private void onPlayerDisconnect(PlayerDisconnectEvent e) {
+    public void onPlayerDisconnect(PlayerDisconnectEvent e) {
         timerCaches.removeIf(a -> a.getUuid().toString().equals(e.getPlayer().getUniqueId().toString()));
     }
 }
