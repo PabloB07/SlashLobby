@@ -2,6 +2,8 @@ package dev.rodrigo.slashlobby;
 
 import com.google.inject.Inject;
 import com.velocitypowered.api.command.CommandSource;
+import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.Player;
@@ -26,12 +28,13 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 @Plugin(
         id = "slashlobby",
         name = "SlashLobby",
-        version = "2.2",
+        version = "2.2.2",
         authors = {"Rodrigo R."}
 )
 public class SlashLobby {
@@ -189,6 +192,8 @@ public class SlashLobby {
                     "slobby",
                     new VelocityReloadCommand()
             );
+
+            proxyServer.getEventManager().register(this, this);
         } catch (Exception e) {
             logger.error("Failed to load config due to: "+ e);
         }
@@ -214,7 +219,7 @@ public class SlashLobby {
         final RegisteredServer registeredServer = server.get().getServer();
 
         // If the player is already in the lobby, don't do anything
-        if (registeredServer == LOBBY_SERVER) {
+        if (registeredServer.equals(LOBBY_SERVER)) {
             sendTitle(player, ALREADY_IN_LOBBY_TITLE);
             player.sendMessage(
                     messageColor.deserialize(
@@ -227,20 +232,19 @@ public class SlashLobby {
         // Check for any cool down
         if (ConfigContainer.COOL_DOWN_ENABLED) {
             final long timeElapsedSinceLastUsage = CoolDownCacheStorage.getTimeElapsedSinceLastUsage(player.getUniqueId());
-            final long realTimeElapsed = System.currentTimeMillis() - timeElapsedSinceLastUsage;
             if (timeElapsedSinceLastUsage > -1 &&
                     // Logic: if the time elapsed since the last usage is less than the cool down registered time, the player can't use the command again
-                    realTimeElapsed < CoolDownCacheStorage.getCoolDownRegisteredTime()
+                    timeElapsedSinceLastUsage < CoolDownCacheStorage.getCoolDownRegisteredTime()
             ) {
                 // Divide by 1000 to get seconds instead of milliseconds
-                final long missingTime = (CoolDownCacheStorage.getCoolDownRegisteredTime() - realTimeElapsed) / 1000;
+                final long missingTime = (CoolDownCacheStorage.getCoolDownRegisteredTime() - timeElapsedSinceLastUsage) / 1000;
                 // -1 means that no usage was found
                 sendTitle(player, ERROR_COOL_DOWN_TITLE);
                 player.sendMessage(
                         messageColor.deserialize(
                                  replacePlaceholders(
                                          ConfigContainer.ERROR_COOL_DOWN_MESSAGE
-                                                 .replaceAll("\\{time}", String.valueOf(missingTime)),
+                                                 .replaceAll("(?i)\\{time}", String.valueOf(missingTime)),
                                          player
                                  )
                          )
@@ -305,5 +309,16 @@ public class SlashLobby {
         if (!(player instanceof Player)) return message;
         return message
                 .replaceAll("(?i)\\{player}", ((Player) player).getUsername());
+    }
+
+    @Subscribe
+    public void onDisconnect(DisconnectEvent event) {
+        if (event.getPlayer().isActive()) {
+            // Velocity may forward this event when a player changes servers
+            return;
+        }
+        // Remove player from cool down cache if they disconnect
+        UUID playerId = event.getPlayer().getUniqueId();
+        CoolDownCacheStorage.deleteUsage(playerId);
     }
 }

@@ -2,6 +2,7 @@ package dev.rodrigo.slashlobby.command;
 
 import dev.rodrigo.slashlobby.SlashLobby;
 import dev.rodrigo.slashlobby.bungee.LobbyBungee;
+import dev.rodrigo.slashlobby.util.BungeeConfigLoader;
 import dev.rodrigo.slashlobby.util.ConfigContainer;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -21,7 +22,7 @@ public class ReloadBungeeCommand extends Command {
         // Check if the sender has the correct permission
         if (source.hasPermission(BungeeLobbyCommand.RELOAD_PERMISSION)) {
             // Reload the config
-            ConfigContainer.init(SlashLobby.instance);
+            BungeeConfigLoader.init(LobbyBungee.instance.getConfig());
             source.sendMessage(
                     TextComponent.fromLegacyText(
                             LobbyBungee.replacePlaceholders(

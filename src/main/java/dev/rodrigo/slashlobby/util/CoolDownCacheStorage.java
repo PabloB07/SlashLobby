@@ -56,6 +56,10 @@ public abstract class CoolDownCacheStorage {
         return !COOL_DOWN_CACHE.containsKey(uuid) ? -1 :  System.currentTimeMillis() - COOL_DOWN_CACHE.get(uuid);
     }
 
+    public static void deleteUsage(UUID uuid) {
+        COOL_DOWN_CACHE.remove(uuid);
+    }
+
     public static int getCoolDownRegisteredTime() {
         return COOL_DOWN_REGISTERED_TIME;
     }

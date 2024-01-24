@@ -2,6 +2,7 @@ package dev.rodrigo.slashlobby.command;
 
 import dev.rodrigo.slashlobby.SlashLobby;
 import dev.rodrigo.slashlobby.bungee.LobbyBungee;
+import dev.rodrigo.slashlobby.util.BungeeConfigLoader;
 import dev.rodrigo.slashlobby.util.ConfigContainer;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -26,7 +27,7 @@ public class BungeeLobbyCommand extends Command {
             // Check if the sender has the correct permission
             if (source.hasPermission(RELOAD_PERMISSION)) {
                 // Reload the config
-                ConfigContainer.init(SlashLobby.instance);
+                BungeeConfigLoader.init(LobbyBungee.instance.getConfig());
                 source.sendMessage(
                         TextComponent.fromLegacyText(
                                 LobbyBungee.replacePlaceholders(
@@ -35,6 +36,7 @@ public class BungeeLobbyCommand extends Command {
                                 )
                         )
                 );
+                return;
             } else if (!ConfigContainer.FORWARD_NO_PERMISSION) {
                 // Check if the user has the option "forward-no-permission" to true
                 // If so, forward the player into the lobby anyway

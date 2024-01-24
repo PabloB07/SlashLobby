@@ -11,10 +11,13 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.connection.Server;
+import net.md_5.bungee.api.event.PlayerDisconnectEvent;
+import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.scheduler.TaskScheduler;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.YamlConfiguration;
+import net.md_5.bungee.event.EventHandler;
 
 import javax.annotation.Nonnull;
 import java.io.InputStream;
@@ -23,7 +26,7 @@ import java.nio.file.Path;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
-public class LobbyBungee extends Plugin {
+public class LobbyBungee extends Plugin implements Listener {
     Logger logger;
     public ProxyServer proxyServer;
     public Path dataDir;
@@ -42,7 +45,7 @@ public class LobbyBungee extends Plugin {
     // Define the instance so we can reload
     public static LobbyBungee instance;
 
-    // BungeeCors uses the TextComponent API, instead of Velocity's Adventure API
+    // BungeeCord uses the TextComponent API, instead of Velocity's Adventure API
     // public static MiniMessage messageColor;
 
     @Override
@@ -71,7 +74,7 @@ public class LobbyBungee extends Plugin {
             }
 
             // Use the built-in configuration loader
-            // Using external loaders is possible, however Velocity has its own loader
+            // Using external loaders is possible, however BungeeCord has its own loader
             // As of 1.0 to 2.1, the plugin was using an own loader, which is deprecated
             // This was fixed in 2.2
             configurationNode = YamlConfiguration.getProvider(YamlConfiguration.class)
@@ -174,6 +177,9 @@ public class LobbyBungee extends Plugin {
                     this,
                     new ReloadBungeeCommand()
             );
+
+            // Register all listeners
+            getProxy().getPluginManager().registerListener(this, this);
         } catch (Exception e) {
             logger.severe("Failed to load config due to: "+ e);
         }
@@ -199,7 +205,7 @@ public class LobbyBungee extends Plugin {
         final ServerInfo registeredServer = server.getInfo();
 
         // If the player is already in the lobby, don't do anything
-        if (registeredServer == LOBBY_SERVER) {
+        if (registeredServer.equals(LOBBY_SERVER)) {
             sendTitle(player, ALREADY_IN_LOBBY_TITLE);
             player.sendMessage(
                     TextComponent.fromLegacyText(
@@ -212,20 +218,19 @@ public class LobbyBungee extends Plugin {
         // Check for any cool down
         if (ConfigContainer.COOL_DOWN_ENABLED) {
             final long timeElapsedSinceLastUsage = CoolDownCacheStorage.getTimeElapsedSinceLastUsage(player.getUniqueId());
-            final long realTimeElapsed = System.currentTimeMillis() - timeElapsedSinceLastUsage;
             if (timeElapsedSinceLastUsage > -1 &&
                     // Logic: if the time elapsed since the last usage is less than the cool down registered time, the player can't use the command again
-                    realTimeElapsed < CoolDownCacheStorage.getCoolDownRegisteredTime()
+                    timeElapsedSinceLastUsage < CoolDownCacheStorage.getCoolDownRegisteredTime()
             ) {
                 // Divide by 1000 to get seconds instead of milliseconds
-                final long missingTime = (CoolDownCacheStorage.getCoolDownRegisteredTime() - realTimeElapsed) / 1000;
+                final long missingTime = (CoolDownCacheStorage.getCoolDownRegisteredTime() - timeElapsedSinceLastUsage) / 1000;
                 // -1 means that no usage was found
                 sendTitle(player, ERROR_COOL_DOWN_TITLE);
                 player.sendMessage(
                         TextComponent.fromLegacyText(
                                 replacePlaceholders(
                                         ConfigContainer.ERROR_COOL_DOWN_MESSAGE
-                                                .replaceAll("\\{time}", String.valueOf(missingTime)),
+                                                .replaceAll("(?i)\\{time}", String.valueOf(missingTime)),
                                         player
                                 )
                         )
@@ -248,11 +253,11 @@ public class LobbyBungee extends Plugin {
             return;
         }
 
-        sendTitle(player, ERROR_COOL_DOWN_TITLE);
+        sendTitle(player, SENDING_TITLE);
         player.sendMessage(
                 TextComponent.fromLegacyText(
                         replacePlaceholders(
-                                ConfigContainer.ERROR_COOL_DOWN_MESSAGE,
+                                ConfigContainer.SENDING_MESSAGE,
                                 player
                         )
                 )
@@ -292,5 +297,10 @@ public class LobbyBungee extends Plugin {
         if (!(player instanceof ProxiedPlayer)) return message;
         return message
                 .replaceAll("(?i)\\{player}", player.getName());
+    }
+
+    @EventHandler
+    public void onPlayerDisconnect(PlayerDisconnectEvent event) {
+        CoolDownCacheStorage.deleteUsage(event.getPlayer().getUniqueId());
     }
 }
