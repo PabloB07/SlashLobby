@@ -1,129 +1,59 @@
 package dev.rodrigo.slashlobby.bungee;
-import dev.rodrigo.slashlobby.commands.SlashBungee;
-import dev.rodrigo.slashlobby.lib.Parser;
-import dev.rodrigo.slashlobby.lib.TimerCache;
+
+import dev.rodrigo.slashlobby.command.BungeeLobbyCommand;
+import dev.rodrigo.slashlobby.util.ConfigContainer;
+import dev.rodrigo.slashlobby.util.CoolDownCacheStorage;
+import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.Title;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.connection.Server;
-import net.md_5.bungee.api.event.PlayerDisconnectEvent;
-import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
-import net.md_5.bungee.event.EventHandler;
+import net.md_5.bungee.api.scheduler.TaskScheduler;
+import net.md_5.bungee.config.Configuration;
+import net.md_5.bungee.config.YamlConfiguration;
 
-import java.io.FileNotFoundException;
+import javax.annotation.Nonnull;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 
-public class LobbyBungee extends Plugin implements Listener {
-    public Parser config;
+public class LobbyBungee extends Plugin {
+    Logger logger;
     public ProxyServer proxyServer;
-    private ServerInfo server;
-    private Path dataDir;
-    private final List<TimerCache> timerCaches = new ArrayList<>();
+    public Path dataDir;
 
-    public void ReloadConfig() throws FileNotFoundException {
-        config = new Parser(dataDir.resolve("config.yml"));
-        timerCaches.forEach(a -> a.setParser(config));
-    }
+    static Configuration configurationNode;
+    static ServerInfo LOBBY_SERVER;
+    static TaskScheduler SCHEDULER;
 
-    private void SendTitle(ProxiedPlayer player, String child) {
-        if (config.AsBoolean("titles.enabled")) {
-            player.sendTitle(
-                    getProxy().createTitle()
-                            .title(
-                                    TextComponent.fromLegacyText(
-                                            config.AsString("titles." + child + ".title").replaceAll("(?i)\\{player}", player.getName()).replaceAll("&", "§")
-                                    )
-                            )
-                            .subTitle(
-                                    TextComponent.fromLegacyText(
-                                            config.AsString("titles." + child + ".subtitle").replaceAll("(?i)\\{player}", player.getName()).replaceAll("&", "§")
-                                    )
-                            )
-                            .stay(config.AsInt("titles.stay"))
-                            .fadeIn(config.AsInt("titles.fadein"))
-                            .fadeOut(config.AsInt("titles.fadeout"))
-            );
-        }
-    }
+    // Load titles from config
+    public static Title SENDING_TITLE;
+    public static Title ERROR_COOL_DOWN_TITLE;
+    public static Title ALREADY_IN_LOBBY_TITLE;
+    public static Title DISABLED_TITLE;
+    public static Title INTERNAL_ERROR_TITLE;
 
-    public void CreateConnectionRequest(ProxiedPlayer player) {
-        final Server currentServer = player.getServer();
-        if (currentServer == null) {
-            SendTitle(player, "internal_error");
-            player.sendMessage(
-                    TextComponent.fromLegacyText(config.AsString("messages.internal_error")
-                            .replaceAll("(?i)\\{player}", player.getName())
-                            .replaceAll("&", "§"))
-            );
-            return;
-        }
-        if (currentServer.getInfo().getName().equals(server.getName())) {
-            SendTitle(player, "already_in_lobby");
-            player.sendMessage(
-                    TextComponent.fromLegacyText(config.AsString("messages.already_in_lobby")
-                            .replaceAll("(?i)\\{player}", player.getName())
-                            .replaceAll("&", "§"))
-            );
-            return;
-        }
-        if ( config.AsStringList("disabled_servers").stream().anyMatch(a -> a.equals(currentServer.getInfo().getName())) ) {
-            SendTitle(player, "disabled");
-            player.sendMessage(
-                    TextComponent.fromLegacyText(config.AsString("messages.disabled")
-                            .replaceAll("(?i)\\{player}", player.getName())
-                            .replaceAll("&", "§"))
-            );
-            return;
-        }
-        if (config.AsBoolean("cooldown.enabled")) {
-            final Optional<TimerCache> cache = timerCaches.stream().filter(a -> a.getUuid().equals(
-                    player.getUniqueId()
-            )).findFirst();
-            if (cache.isPresent()) {
-                if (!cache.get().canUse()) {
-                    SendTitle(player, "cooldown");
-                    player.sendMessage(
-                            TextComponent.fromLegacyText(config.AsString("messages.cooldown")
-                                    .replaceAll("(?i)\\{time}", String.valueOf(
-                                            cache.get().getCurrentCooldown()
-                                    ))
-                                    .replaceAll("(?i)\\{player}", player.getName())
-                                    .replaceAll("&", "§"))
-                    );
-                    return;
-                }
-                cache.get().registerNewUsage();
-            } else {
-                timerCaches.add(new TimerCache()
-                        .setUuid(player.getUniqueId())
-                        .setLastUsed(System.currentTimeMillis())
-                        .setParser(config)
-                        .registerNewUsage()
-                );
-            }
-        }
-        SendTitle(player, "sending");
-        player.sendMessage(
-                TextComponent.fromLegacyText(config.AsString("messages.sending")
-                        .replaceAll("(?i)\\{player}", player.getName())
-                        .replaceAll("&", "§"))
-        );
-        player.connect(server);
-    }
+    // Define the instance so we can reload
+    public static LobbyBungee instance;
+
+    // BungeeCors uses the TextComponent API, instead of Velocity's Adventure API
+    // public static MiniMessage messageColor;
 
     @Override
     public void onEnable() {
+        // On startup
         this.proxyServer = getProxy();
-        Logger logger = getLogger();
+        this.logger = getLogger();
         this.dataDir = getDataFolder().toPath();
+        instance = this;
+
+        // Code rebuilt on v.2.2
+        // Data folder may not exist yet on first run
         if (!dataDir.toFile().exists() && !dataDir.toFile().mkdirs()) {
             logger.severe("Failed to create data directory");
             return;
@@ -138,27 +68,224 @@ public class LobbyBungee extends Plugin implements Listener {
                 }
                 Files.copy(configStream, dataDir.resolve("config.yml"));
             }
-            config = new Parser(dataDir.resolve("config.yml"));
+
+            // Use the built-in configuration loader
+            // Using external loaders is possible, however Velocity has its own loader
+            // As of 1.0 to 2.1, the plugin was using an own loader, which is deprecated
+            // This was fixed in 2.2
+            configurationNode = YamlConfiguration.getProvider(YamlConfiguration.class)
+                    .load(dataDir.resolve("config.yml").toFile());
+
+            // Load all the config into variables
+            ConfigContainer.init(this);
+
+            SENDING_TITLE = proxyServer.createTitle()
+                    .title(
+                            TextComponent.fromLegacyText(
+                                    ConfigContainer.TITLES_SENDING_TITLE
+                            )
+                    ).title(
+                            TextComponent.fromLegacyText(
+                                    ConfigContainer.TITLES_SENDING_SUBTITLE
+                            )
+                    )
+                    .fadeIn(ConfigContainer.TITLES_FADE_IN)
+                    .fadeOut(ConfigContainer.TITLES_FADEOUT)
+                    .stay(ConfigContainer.TITLES_STAY);
+
+            ERROR_COOL_DOWN_TITLE = proxyServer.createTitle()
+                    .title(
+                            TextComponent.fromLegacyText(
+                                    ConfigContainer.TITLES_COOL_DOWN_TITLE
+                            )
+                    ).title(
+                            TextComponent.fromLegacyText(
+                                    ConfigContainer.TITLES_COOL_DOWN_SUBTITLE
+                            )
+                    )
+                    .fadeIn(ConfigContainer.TITLES_FADE_IN)
+                    .fadeOut(ConfigContainer.TITLES_FADEOUT)
+                    .stay(ConfigContainer.TITLES_STAY);
+
+            ALREADY_IN_LOBBY_TITLE = proxyServer.createTitle()
+                    .title(
+                            TextComponent.fromLegacyText(
+                                    ConfigContainer.TITLES_ALREADY_IN_LOBBY_TITLE
+                            )
+                    ).title(
+                            TextComponent.fromLegacyText(
+                                    ConfigContainer.TITLES_ALREADY_IN_LOBBY_SUBTITLE
+                            )
+                    )
+                    .fadeIn(ConfigContainer.TITLES_FADE_IN)
+                    .fadeOut(ConfigContainer.TITLES_FADEOUT)
+                    .stay(ConfigContainer.TITLES_STAY);
+
+            DISABLED_TITLE = proxyServer.createTitle()
+                    .title(
+                            TextComponent.fromLegacyText(
+                                    ConfigContainer.TITLES_DISABLED_TITLE
+                            )
+                    ).title(
+                            TextComponent.fromLegacyText(
+                                    ConfigContainer.TITLES_DISABLED_SUBTITLE
+                            )
+                    )
+                    .fadeIn(ConfigContainer.TITLES_FADE_IN)
+                    .fadeOut(ConfigContainer.TITLES_FADEOUT)
+                    .stay(ConfigContainer.TITLES_STAY);
+
+            INTERNAL_ERROR_TITLE = proxyServer.createTitle()
+                    .title(
+                            TextComponent.fromLegacyText(
+                                    ConfigContainer.TITLES_INTERNAL_ERROR_TITLE
+                            )
+                    ).title(
+                            TextComponent.fromLegacyText(
+                                    ConfigContainer.TITLES_INTERNAL_ERROR_SUBTITLE
+                            )
+                    )
+                    .fadeIn(ConfigContainer.TITLES_FADE_IN)
+                    .fadeOut(ConfigContainer.TITLES_FADEOUT)
+                    .stay(ConfigContainer.TITLES_STAY);
+
+            // Init the cool down cache if enabled
+            if (ConfigContainer.COOL_DOWN_ENABLED) CoolDownCacheStorage.init();
+
+            // Load the server
+            final String server = ConfigContainer.LOBBY_SERVER;
+            final ServerInfo registeredServer = proxyServer.getServerInfo(server);
+            if (registeredServer == null) {
+                logger.severe("Lobby server not found! Please check your config (server: "+ server +"). The plugin will enable, but it won't work.");
+                return;
+            }
+            LOBBY_SERVER = registeredServer;
+            SCHEDULER = proxyServer.getScheduler();
+
             logger.info("Config loaded");
+
+            // Register all commands with their aliases
+            proxyServer.getPluginManager().registerCommand(
+                    this,
+                    new BungeeLobbyCommand()
+            );
         } catch (Exception e) {
             logger.severe("Failed to load config due to: "+ e);
         }
-        final ServerInfo registeredServer = proxyServer.getServerInfo(config.AsString("server"));
-        if (registeredServer == null) {
-            logger.severe("Server not found");
-            return;
-        }
-        server = registeredServer;
-        logger.info("Server loaded");
-        proxyServer.getPluginManager().registerCommand(this, new SlashBungee(this, "lobby"));
-        for (String a : config.AsStringList("aliases")) {
-            proxyServer.getPluginManager().registerCommand(this, new SlashBungee(this, a));
-        }
-        proxyServer.getPluginManager().registerListener(this, this);
     }
 
-    @EventHandler
-    public void onPlayerDisconnect(PlayerDisconnectEvent e) {
-        timerCaches.removeIf(a -> a.getUuid().toString().equals(e.getPlayer().getUniqueId().toString()));
+    // This method is used to forward a player to the lobby
+    public static void createConnectionRequest(@Nonnull ProxiedPlayer player) {
+        final Server server = player.getServer();
+        // If for any reason the player is not connected to a server, don't do anything
+        if (server == null) {
+            sendTitle(player, INTERNAL_ERROR_TITLE);
+            player.sendMessage(
+                    TextComponent.fromLegacyText(
+                            replacePlaceholders(
+                                    ConfigContainer.INTERNAL_ERROR_MESSAGE,
+                                    player
+                            )
+                    )
+            );
+            return;
+        }
+
+        final ServerInfo registeredServer = server.getInfo();
+
+        // If the player is already in the lobby, don't do anything
+        if (registeredServer == LOBBY_SERVER) {
+            sendTitle(player, ALREADY_IN_LOBBY_TITLE);
+            player.sendMessage(
+                    TextComponent.fromLegacyText(
+                            replacePlaceholders(ConfigContainer.ALREADY_IN_LOBBY_MESSAGE, player)
+                    )
+            );
+            return;
+        }
+
+        // Check for any cool down
+        if (ConfigContainer.COOL_DOWN_ENABLED) {
+            final long timeElapsedSinceLastUsage = CoolDownCacheStorage.getTimeElapsedSinceLastUsage(player.getUniqueId());
+            final long realTimeElapsed = System.currentTimeMillis() - timeElapsedSinceLastUsage;
+            if (timeElapsedSinceLastUsage > -1 &&
+                    // Logic: if the time elapsed since the last usage is less than the cool down registered time, the player can't use the command again
+                    realTimeElapsed < CoolDownCacheStorage.getCoolDownRegisteredTime()
+            ) {
+                // Divide by 1000 to get seconds instead of milliseconds
+                final long missingTime = (CoolDownCacheStorage.getCoolDownRegisteredTime() - realTimeElapsed) / 1000;
+                // -1 means that no usage was found
+                sendTitle(player, ERROR_COOL_DOWN_TITLE);
+                player.sendMessage(
+                        TextComponent.fromLegacyText(
+                                replacePlaceholders(
+                                        ConfigContainer.ERROR_COOL_DOWN_MESSAGE
+                                                .replaceAll("\\{time}", String.valueOf(missingTime)),
+                                        player
+                                )
+                        )
+                );
+                return;
+            }
+        }
+
+        // Check if the player is on a forbidden server
+        if (ConfigContainer.DISABLED_SERVERS.contains(registeredServer.getName())) {
+            sendTitle(player, DISABLED_TITLE);
+            player.sendMessage(
+                    TextComponent.fromLegacyText(
+                            replacePlaceholders(
+                                    ConfigContainer.DISABLED_SERVER_MESSAGE,
+                                    player
+                            )
+                    )
+            );
+            return;
+        }
+
+        sendTitle(player, ERROR_COOL_DOWN_TITLE);
+        player.sendMessage(
+                TextComponent.fromLegacyText(
+                        replacePlaceholders(
+                                ConfigContainer.ERROR_COOL_DOWN_MESSAGE,
+                                player
+                        )
+                )
+        );
+
+        CoolDownCacheStorage.registerUsage(player.getUniqueId());
+
+        // Forward the player into the lobby
+        doDelay((Void ignored) -> player.connect(LOBBY_SERVER));
+    }
+
+    public static void doDelay(Consumer<Void> consumer) {
+        // Execute the delay if enabled
+        if (!ConfigContainer.DELAY_COMMANDS) consumer.accept(null);
+        // Schedule the task
+        SCHEDULER.schedule(
+                LobbyBungee.instance,
+                () -> consumer.accept(null),
+                ConfigContainer.DELAY_COMMANDS_VALUE,
+                ConfigContainer.DELAY_COMMANDS_UNIT
+        );
+    }
+
+    public static void sendTitle(ProxiedPlayer player, Title title) {
+        // Don't do anything if titles are disabled
+        if (!ConfigContainer.TITLES_ENABLED) return;
+        player.sendTitle(title);
+    }
+
+    // Create a getter
+    // Refer To: util/ConfigContainer to see how this is implemented
+    public Configuration getConfig() {
+        return configurationNode;
+    }
+
+    public static String replacePlaceholders(String message, CommandSender player) {
+        if (!(player instanceof ProxiedPlayer)) return message;
+        return message
+                .replaceAll("(?i)\\{player}", player.getName());
     }
 }

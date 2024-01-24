@@ -12,14 +12,14 @@ aliases:
   - "hub" # Aliases for the /lobby command (In this example, the /hub command will do the same as the /lobby command)
 
 messages:
-  sending: "&aSending you to the lobby..."
-  already_in_lobby: "&cYou are already in the lobby!"
-  disabled: "&cThis command is disabled on this server!"
-  error_console: "&cYou cannot execute this command in the console!"
-  internal_error: "&cAn internal error has occurred."
-  cooldown: "&cYou may use this command again in {time} seconds."
-  no_permission: "&cYou don't have permission to execute this command."
-  config_reload: "&aConfig reloaded!"
+  sending: "<green>Sending you to the lobby..."
+  already_in_lobby: "<red>You are already in the lobby!"
+  disabled: "<red>This command is disabled on this server!"
+  error_console: "<red>You cannot execute this command in the console!"
+  internal_error: "<red>An internal error has occurred."
+  cooldown: "<red>You may use this command again in {time} seconds."
+  no_permission: "<red>You don't have permission to execute this command."
+  config_reload: "<green>Config reloaded!"
 
 forward_no_permission: true # Forward Players to Lobby if they don't have permission to reload the config
 
@@ -40,19 +40,19 @@ titles: # Should the plugin display titles?
   stay: 10
   fadeout: 5
   sending:
-    title: "&aLobby"
-    subtitle: "&aSending you to the lobby..."
+    title: "<green>Lobby"
+    subtitle: "<green>Sending you to the lobby..."
   cooldown:
-    title: "&aLobby"
-    subtitle: "&aYou may use this command again in {time}."
+    title: "<green>Lobby"
+    subtitle: "<green>You may use this command again in {time}."
   already_in_lobby:
-    title: "&cLobby"
-    subtitle: "&cYou are already in the lobby!"
+    title: "<red>Lobby"
+    subtitle: "<red>You are already in the lobby!"
   disabled:
-    title: "&cLobby"
-    subtitle: "&cThis command is disabled on this server!"
+    title: "<red>Lobby"
+    subtitle: "<red>This command is disabled on this server!"
   internal_error:
-    title: "&cLobby"
-    subtitle: "&cAn internal error has ocurred."
+    title: "<red>Lobby"
+    subtitle: "<red>An internal error has ocurred."
 
   # The variable {player} is available on messages (variable for titles removed on v2.2).
