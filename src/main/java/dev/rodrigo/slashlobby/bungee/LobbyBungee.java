@@ -1,6 +1,7 @@
 package dev.rodrigo.slashlobby.bungee;
 
 import dev.rodrigo.slashlobby.command.BungeeLobbyCommand;
+import dev.rodrigo.slashlobby.command.ReloadBungeeCommand;
 import dev.rodrigo.slashlobby.util.ConfigContainer;
 import dev.rodrigo.slashlobby.util.CoolDownCacheStorage;
 import net.md_5.bungee.api.CommandSender;
@@ -168,6 +169,10 @@ public class LobbyBungee extends Plugin {
             proxyServer.getPluginManager().registerCommand(
                     this,
                     new BungeeLobbyCommand()
+            );
+            proxyServer.getPluginManager().registerCommand(
+                    this,
+                    new ReloadBungeeCommand()
             );
         } catch (Exception e) {
             logger.severe("Failed to load config due to: "+ e);

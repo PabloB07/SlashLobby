@@ -10,6 +10,7 @@ import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.scheduler.Scheduler;
 import dev.rodrigo.slashlobby.command.VelocityLobbyCommand;
+import dev.rodrigo.slashlobby.command.VelocityReloadCommand;
 import dev.rodrigo.slashlobby.util.ConfigContainer;
 import dev.rodrigo.slashlobby.util.CoolDownCacheStorage;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -183,6 +184,10 @@ public class SlashLobby {
                     "lobby",
                     new VelocityLobbyCommand(),
                     ConfigContainer.COMMAND_ALIASES.toArray(String[]::new)
+            );
+            proxyServer.getCommandManager().register(
+                    "slobby",
+                    new VelocityReloadCommand()
             );
         } catch (Exception e) {
             logger.error("Failed to load config due to: "+ e);
