@@ -19,6 +19,11 @@ public class VelocityLobbyCommand implements SimpleCommand {
             // Check if the sender has the correct permission
             if (source.hasPermission(RELOAD_PERMISSION)) {
                 // Reload the config
+                try {
+                    SlashLobby.instance.reInitConfig();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
                 ConfigContainer.init(SlashLobby.instance);
                 source.sendMessage(
                         SlashLobby.messageColor.deserialize(

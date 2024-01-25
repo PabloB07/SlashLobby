@@ -93,9 +93,7 @@ public class SlashLobby {
             // Using external loaders is possible, however Velocity has its own loader
             // As of 1.0 to 2.1, the plugin was using an own loader, which is deprecated
             // This was fixed in 2.2
-            configurationNode = YamlConfigurationLoader.builder().path(
-                    dataDir.resolve("config.yml")
-            ).build().load();
+            reInitConfig();
 
             // Load all the config into variables
             ConfigContainer.init(this);
@@ -297,6 +295,12 @@ public class SlashLobby {
         // Don't do anything if titles are disabled
         if (!ConfigContainer.TITLES_ENABLED) return;
         player.showTitle(title);
+    }
+
+    public void reInitConfig() throws Exception {
+        configurationNode = YamlConfigurationLoader.builder().path(
+                dataDir.resolve("config.yml")
+        ).build().load();
     }
 
     // Create a getter

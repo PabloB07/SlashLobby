@@ -77,8 +77,7 @@ public class LobbyBungee extends Plugin implements Listener {
             // Using external loaders is possible, however BungeeCord has its own loader
             // As of 1.0 to 2.1, the plugin was using an own loader, which is deprecated
             // This was fixed in 2.2
-            configurationNode = YamlConfiguration.getProvider(YamlConfiguration.class)
-                    .load(dataDir.resolve("config.yml").toFile());
+            reInitConfig();
 
             // Load all the config into variables
             ConfigContainer.init(this);
@@ -88,7 +87,7 @@ public class LobbyBungee extends Plugin implements Listener {
                             TextComponent.fromLegacyText(
                                     ConfigContainer.TITLES_SENDING_TITLE
                             )
-                    ).title(
+                    ).subTitle(
                             TextComponent.fromLegacyText(
                                     ConfigContainer.TITLES_SENDING_SUBTITLE
                             )
@@ -102,7 +101,7 @@ public class LobbyBungee extends Plugin implements Listener {
                             TextComponent.fromLegacyText(
                                     ConfigContainer.TITLES_COOL_DOWN_TITLE
                             )
-                    ).title(
+                    ).subTitle(
                             TextComponent.fromLegacyText(
                                     ConfigContainer.TITLES_COOL_DOWN_SUBTITLE
                             )
@@ -116,7 +115,7 @@ public class LobbyBungee extends Plugin implements Listener {
                             TextComponent.fromLegacyText(
                                     ConfigContainer.TITLES_ALREADY_IN_LOBBY_TITLE
                             )
-                    ).title(
+                    ).subTitle(
                             TextComponent.fromLegacyText(
                                     ConfigContainer.TITLES_ALREADY_IN_LOBBY_SUBTITLE
                             )
@@ -130,7 +129,7 @@ public class LobbyBungee extends Plugin implements Listener {
                             TextComponent.fromLegacyText(
                                     ConfigContainer.TITLES_DISABLED_TITLE
                             )
-                    ).title(
+                    ).subTitle(
                             TextComponent.fromLegacyText(
                                     ConfigContainer.TITLES_DISABLED_SUBTITLE
                             )
@@ -144,7 +143,7 @@ public class LobbyBungee extends Plugin implements Listener {
                             TextComponent.fromLegacyText(
                                     ConfigContainer.TITLES_INTERNAL_ERROR_TITLE
                             )
-                    ).title(
+                    ).subTitle(
                             TextComponent.fromLegacyText(
                                     ConfigContainer.TITLES_INTERNAL_ERROR_SUBTITLE
                             )
@@ -185,12 +184,20 @@ public class LobbyBungee extends Plugin implements Listener {
         }
     }
 
+    public void reInitConfig() throws Exception {
+        configurationNode = YamlConfiguration.getProvider(YamlConfiguration.class)
+                .load(dataDir.resolve("config.yml").toFile());
+    }
+
     // This method is used to forward a player to the lobby
     public static void createConnectionRequest(@Nonnull ProxiedPlayer player) {
         final Server server = player.getServer();
         // If for any reason the player is not connected to a server, don't do anything
         if (server == null) {
-            sendTitle(player, INTERNAL_ERROR_TITLE);
+            sendTitle(
+                    player,
+                    INTERNAL_ERROR_TITLE
+            );
             player.sendMessage(
                     TextComponent.fromLegacyText(
                             replacePlaceholders(
