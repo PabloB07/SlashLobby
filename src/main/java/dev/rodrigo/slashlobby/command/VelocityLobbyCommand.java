@@ -33,6 +33,8 @@ public class VelocityLobbyCommand implements SimpleCommand {
                                 )
                         )
                 );
+
+                return;
             } else if (!ConfigContainer.FORWARD_NO_PERMISSION) {
                 // Check if the user has the option "forward-no-permission" to true
                 // If so, forward the player into the lobby anyway

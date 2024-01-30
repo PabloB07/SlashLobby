@@ -42,15 +42,13 @@ public abstract class VelocityConfigLoader {
                     .getString("&aConfig reloaded!"));
 
             ConfigContainer.FORWARD_NO_PERMISSION = config.node("forward_no_permission").getBoolean();
-            ConfigContainer.DELAY_COMMANDS = config.node("delay", "commands")
+            ConfigContainer.DELAY_COMMANDS = config.node("delay", "enabled")
                     .getBoolean();
 
-            ConfigContainer.DELAY_COMMANDS_UNIT = TimeUnit.of(
-                    ChronoUnit.valueOf(
-                            config.node("delay", "unit")
-                                    .getString("SECONDS")
-                                    .toUpperCase()
-                    )
+            ConfigContainer.DELAY_COMMANDS_UNIT = TimeUnit.valueOf(
+                    config.node("delay", "unit")
+                            .getString("SECONDS")
+                            .toUpperCase()
             );
 
             ConfigContainer.DELAY_COMMANDS_VALUE = config.node("delay" ,"value")

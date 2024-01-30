@@ -29,7 +29,6 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Consumer;
 
 @Plugin(
         id = "slashlobby",
@@ -190,8 +189,6 @@ public class SlashLobby {
                     "slobby",
                     new VelocityReloadCommand()
             );
-
-            proxyServer.getEventManager().register(this, this);
         } catch (Exception e) {
             logger.error("Failed to load config due to: "+ e);
         }
@@ -230,7 +227,7 @@ public class SlashLobby {
         // Check for any cool down
         if (ConfigContainer.COOL_DOWN_ENABLED) {
             final long timeElapsedSinceLastUsage = CoolDownCacheStorage.getTimeElapsedSinceLastUsage(player.getUniqueId());
-            if (timeElapsedSinceLastUsage > -1 &&
+            if (timeElapsedSinceLastUsage > 0 &&
                     // Logic: if the time elapsed since the last usage is less than the cool down registered time, the player can't use the command again
                     timeElapsedSinceLastUsage < CoolDownCacheStorage.getCoolDownRegisteredTime()
             ) {
@@ -265,11 +262,11 @@ public class SlashLobby {
             return;
         }
 
-        sendTitle(player, ERROR_COOL_DOWN_TITLE);
+        sendTitle(player, SENDING_TITLE);
         player.sendMessage(
                 messageColor.deserialize(
                         replacePlaceholders(
-                                ConfigContainer.ERROR_COOL_DOWN_MESSAGE,
+                                ConfigContainer.SENDING_MESSAGE,
                                 player
                         )
                 )
@@ -278,17 +275,21 @@ public class SlashLobby {
         CoolDownCacheStorage.registerUsage(player.getUniqueId());
 
         // Forward the player into the lobby
-        doDelay((Void ignored) -> player.createConnectionRequest(LOBBY_SERVER).connect());
+        doDelay(player);
     }
 
-    public static void doDelay(Consumer<Void> consumer) {
+    public static void doDelay(Player player) {
         // Execute the delay if enabled
-        if (!ConfigContainer.DELAY_COMMANDS) consumer.accept(null);
+        if (!ConfigContainer.DELAY_COMMANDS) {
+            player.createConnectionRequest(LOBBY_SERVER).connect();
+            return;
+        }
         // Schedule the task
         SCHEDULER.buildTask(
                 SlashLobby.instance,
-                () -> consumer.accept(null)
-        ).delay(ConfigContainer.DELAY_COMMANDS_VALUE, ConfigContainer.DELAY_COMMANDS_UNIT);
+                        () -> player.createConnectionRequest(LOBBY_SERVER).connect()
+                ).delay(ConfigContainer.DELAY_COMMANDS_VALUE, ConfigContainer.DELAY_COMMANDS_UNIT)
+                .schedule();
     }
 
     public static void sendTitle(Player player, Title title) {

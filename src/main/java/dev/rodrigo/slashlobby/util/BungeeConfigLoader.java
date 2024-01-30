@@ -33,13 +33,11 @@ public abstract class BungeeConfigLoader {
             ConfigContainer.CONFIG_RELOAD_MESSAGE = ChatColor.translateAlternateColorCodes('&', config.getString("messages.config_reload", "&aConfig reloaded!"));
 
             ConfigContainer.FORWARD_NO_PERMISSION = config.getBoolean("forward_no_permission");
-            ConfigContainer.DELAY_COMMANDS = config.getBoolean("delay.commands");
+            ConfigContainer.DELAY_COMMANDS = config.getBoolean("delay.enabled");
 
-            ConfigContainer.DELAY_COMMANDS_UNIT = TimeUnit.of(
-                    ChronoUnit.valueOf(
-                            config.getString("delay.unit", "SECONDS")
-                                    .toUpperCase()
-                    )
+            ConfigContainer.DELAY_COMMANDS_UNIT = TimeUnit.valueOf(
+                    config.getString("delay.unit", "SECONDS")
+                            .toUpperCase()
             );
 
             ConfigContainer.DELAY_COMMANDS_VALUE = config.getInt("delay.value");

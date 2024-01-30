@@ -212,7 +212,7 @@ public class LobbyBungee extends Plugin implements Listener {
         final ServerInfo registeredServer = server.getInfo();
 
         // If the player is already in the lobby, don't do anything
-        if (registeredServer.equals(LOBBY_SERVER)) {
+        /*if (registeredServer.equals(LOBBY_SERVER)) {
             sendTitle(player, ALREADY_IN_LOBBY_TITLE);
             player.sendMessage(
                     TextComponent.fromLegacyText(
@@ -220,12 +220,12 @@ public class LobbyBungee extends Plugin implements Listener {
                     )
             );
             return;
-        }
+        }*/
 
         // Check for any cool down
         if (ConfigContainer.COOL_DOWN_ENABLED) {
             final long timeElapsedSinceLastUsage = CoolDownCacheStorage.getTimeElapsedSinceLastUsage(player.getUniqueId());
-            if (timeElapsedSinceLastUsage > -1 &&
+            if (timeElapsedSinceLastUsage > 0 &&
                     // Logic: if the time elapsed since the last usage is less than the cool down registered time, the player can't use the command again
                     timeElapsedSinceLastUsage < CoolDownCacheStorage.getCoolDownRegisteredTime()
             ) {
@@ -273,16 +273,20 @@ public class LobbyBungee extends Plugin implements Listener {
         CoolDownCacheStorage.registerUsage(player.getUniqueId());
 
         // Forward the player into the lobby
-        doDelay((Void ignored) -> player.connect(LOBBY_SERVER));
+        doDelay(player);
     }
 
-    public static void doDelay(Consumer<Void> consumer) {
+    public static void doDelay(ProxiedPlayer player) {
         // Execute the delay if enabled
-        if (!ConfigContainer.DELAY_COMMANDS) consumer.accept(null);
+        if (!ConfigContainer.DELAY_COMMANDS) {
+            player.connect(LOBBY_SERVER);
+            return;
+        }
+
         // Schedule the task
         SCHEDULER.schedule(
                 LobbyBungee.instance,
-                () -> consumer.accept(null),
+                () -> player.connect(LOBBY_SERVER),
                 ConfigContainer.DELAY_COMMANDS_VALUE,
                 ConfigContainer.DELAY_COMMANDS_UNIT
         );
